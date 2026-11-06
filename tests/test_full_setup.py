@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, Mock, patch
 from homeassistant import loader
 from homeassistant.config_entries import ConfigEntries, ConfigEntry, ConfigEntryState
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import device_registry as dr, entity_registry as er
+from homeassistant.helpers import device_registry as dr, entity_registry as er, frame
 
 from gac_connect.errors import GacError
 from custom_components.gac_connect.api import decode_status
@@ -36,12 +36,14 @@ async def home_assistant(tmp_path):
     hass = HomeAssistant(str(tmp_path))
     hass.config.time_zone = "Asia/Bangkok"
     loader.async_setup(hass)
+    if hasattr(frame, "async_setup"):  # Home Assistant starts this first; entry setup reports through it from 2026.11.
+        frame.async_setup(hass)
     if hasattr(dr, "async_setup"):
         dr.async_setup(hass)
-    await dr.async_load(hass)
-    await er.async_load(hass)
     hass.config_entries = ConfigEntries(hass, {})
     await hass.config_entries.async_initialize()
+    await dr.async_load(hass)
+    await er.async_load(hass)
     return hass
 
 
@@ -83,6 +85,7 @@ def test_the_whole_entry_lifecycle(tmp_path):
             await hass.config_entries.async_add(car)
             await hass.async_block_till_done()
             assert car.state is ConfigEntryState.LOADED
+            assert hass.states.async_all("climate")[0].attributes["temperature"] is not None
             states = {s.entity_id: s.state for s in hass.states.async_all() if "aion_ut" in s.entity_id}
             assert states["sensor.aion_ut_battery"] == "62.0" and states["lock.aion_ut_doors"] == "locked"
             assert len(states) > 40

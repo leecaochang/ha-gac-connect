@@ -15,7 +15,7 @@ location.
 
 ## Requirements
 
-- Home Assistant 2025.3 or newer. Tested on 2025.3.0 and 2026.10.2; a current release is
+- Home Assistant 2025.3 or newer. Tested on 2025.3.0 and 2026.11.0; a current release is
   recommended, as it carries Home Assistant's latest security fixes.
 - A GAC International app account (or My AION in the United Kingdom) and the mobile
   number it uses.
