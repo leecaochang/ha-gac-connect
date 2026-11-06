@@ -14,6 +14,9 @@ from custom_components.gac_connect.session_store import ConfigEntryStore, sessio
 
 def make_entry(hass, data=None):
     hass.config_entries = ConfigEntries(hass, {})
+    # The registries wait for this from 2026.11, and hand-built entries never run async_initialize.
+    if hasattr(hass.config_entries, "_initialized"):
+        hass.config_entries._initialized.set()
     params = dict(version=1, minor_version=1, domain="gac_connect", title="Test", data=data or {}, options={},
                   source="user", unique_id="VIN", discovery_keys={}, subentries_data=[])
     entry = ConfigEntry(**{k: v for k, v in params.items() if k in inspect.signature(ConfigEntry).parameters})

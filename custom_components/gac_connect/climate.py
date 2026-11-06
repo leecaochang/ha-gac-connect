@@ -33,6 +33,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: GacConfigEntry, add_enti
 
 class GacClimate(GacEntity, ClimateEntity):
     _attr_translation_key = "climate"
+    # 2026.11 reads the native_ names and warns about the plain ones, which older releases need.
+    _attr_native_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_preset_modes = [PRESET_HEATING, PRESET_COOLING]
     _attr_target_temperature_step = 1.0
@@ -66,12 +68,16 @@ class GacClimate(GacEntity, ClimateEntity):
         self.async_on_remove(self._cabin.add_listener(self.async_write_ha_state))
 
     @property
-    def current_temperature(self) -> float | None:
+    def native_current_temperature(self) -> float | None:
         return self.status.cabin_temp_c if self.status else None
 
+    current_temperature = native_current_temperature
+
     @property
-    def target_temperature(self) -> float:
+    def native_target_temperature(self) -> float:
         return self._cabin.target
+
+    target_temperature = native_target_temperature
 
     @property
     def hvac_mode(self) -> HVACMode | None:

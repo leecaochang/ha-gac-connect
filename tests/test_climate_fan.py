@@ -12,6 +12,7 @@ from custom_components.gac_connect._vendor.gac_connect.errors import GacError
 from custom_components.gac_connect._vendor.gac_connect.models import VehicleStatus
 from custom_components.gac_connect._vendor.gac_connect.push import PushResult
 from custom_components.gac_connect.cabin import controller
+from custom_components.gac_connect.climate import GacClimate
 from custom_components.gac_connect.sensor import SENSORS
 from custom_components.gac_connect.switch import GacClimateSwitch
 from test_autodetect import vehicle
@@ -271,3 +272,14 @@ def test_presets_are_only_the_app_buttons(preset):
     with pytest.raises(ServiceValidationError, match="heating or cooling"):
         asyncio.run(entity.async_set_preset_mode(preset))
     coordinator.client.command.assert_not_awaited()
+
+
+def test_temperatures_are_offered_under_the_old_and_the_native_names():
+    """2026.11 warns about a class with only the old names; older releases read nothing else."""
+    members = vars(GacClimate)
+    assert members["native_current_temperature"] is members["current_temperature"]
+    assert members["native_target_temperature"] is members["target_temperature"]
+    assert {"_attr_native_temperature_unit", "_attr_temperature_unit"} <= set(members)
+    climate = object.__new__(GacClimate)
+    assert getattr(climate, "native_temperature_unit" if "native_temperature_unit" in dir(climate)
+                   else "temperature_unit") == "°C"

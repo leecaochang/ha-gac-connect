@@ -1,5 +1,5 @@
-# Home Assistant 2026.10 requires Python 3.14.
-homeassistant==2026.10.2
+# Home Assistant 2026.11 requires Python 3.14.
+homeassistant==2026.11.0
 aiomqtt==2.5.1
 pytest>=9,<10
 ruff>=0.16,<0.17
